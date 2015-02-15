@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading libraries
 
 
-```{r}
+
+```r
 # Load libraries
 library(ggplot2)
 library(plyr)
@@ -19,7 +15,8 @@ library(plyr)
 ## Loading and preprocessing the data
 
 
-```{r}
+
+```r
 # read csv
 activity <- read.csv('activity.csv', colClasses=c('integer','Date','integer'))
 
@@ -34,10 +31,11 @@ stepsPerDay <- ddply(activity, c('date'),summarise, totalsteps=sum(steps,na.rm=T
 ## What is mean total number of steps taken per day?
 
 
-Mean total number od steps: `r mean(stepsPerDay$totalsteps, na.rm=TRUE)`.  
+Mean total number od steps: 9354.2295082.  
 
 
-```{r histogram}
+
+```r
 histogram_stepsPerDay <- ggplot(stepsPerDay,aes(x=totalsteps)) +
   geom_histogram() +
   xlab('Total number of steps') +
@@ -45,11 +43,18 @@ histogram_stepsPerDay <- ggplot(stepsPerDay,aes(x=totalsteps)) +
 print(histogram_stepsPerDay)
 ```
 
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![](PA1_template_files/figure-html/histogram-1.png) 
+
 
 ## What is the average daily activity pattern?
 
 
-```{r}
+
+```r
 line_stepsPerInterval <- ggplot(stepsPerInterval, aes(x=interval, y=meansteps)) +
   geom_line() +
   ggtitle('Average steps per interval') +
@@ -57,17 +62,20 @@ line_stepsPerInterval <- ggplot(stepsPerInterval, aes(x=interval, y=meansteps)) 
 print(line_stepsPerInterval)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
-Interval with max number of steps: `r stepsPerInterval[which(stepsPerInterval$meansteps==max(stepsPerInterval$meansteps)), "interval"]` 
+
+Interval with max number of steps: 835 
 
 
 ## Imputing missing values
 
 
-Number of NAs: `r sum(is.na(activity$steps))`
+Number of NAs: 2304
 
 
-```{r}
+
+```r
 # count NAs
 na <- is.na(activity$steps)
 
@@ -75,8 +83,15 @@ na <- is.na(activity$steps)
 table(na)
 ```
 
+```
+## na
+## FALSE  TRUE 
+## 15264  2304
+```
 
-```{r}
+
+
+```r
 # Replace all NAs with mean value of 5-minute interval and create new complete data frame.
 replace.value <- function(steps, interval) {
     replaced <- NA
@@ -91,13 +106,21 @@ activityReplaced$steps <- mapply(replace.value, activityReplaced$steps, activity
 ```
 
 
-```{r}
+
+```r
 # sanity check for NAs in new data frame
 table(is.na(activityReplaced$steps))
 ```
 
+```
+## 
+## FALSE 
+## 17568
+```
 
-```{r}
+
+
+```r
 # calculate sum
 activityReplacedSum <- tapply(activityReplaced$steps, activityReplaced$date, FUN=sum)
 
@@ -109,6 +132,12 @@ histogram_activityReplacedSum <- qplot(activityReplacedSum, binwidth=1000) +
 print(histogram_activityReplacedSum)
 ```
 
+```
+## stat_bin: binwidth defaulted to range/30. Use 'binwidth = x' to adjust this.
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -116,7 +145,8 @@ print(histogram_activityReplacedSum)
 Extraction of the weekday and type of day
 
 
-```{r}
+
+```r
 # append exact weekday for sanity check
 activityReplaced$weekday <- weekdays(as.Date(activityReplaced$date))
 
@@ -142,7 +172,8 @@ activityReplaced$type <- sapply(activityReplaced$date, FUN=weekday)
 Generate the time series plot.
 
 
-```{r}
+
+```r
 # calculate averages
 averages <- aggregate(steps ~ interval + type, data=activityReplaced, mean)
 
@@ -154,6 +185,8 @@ line_dayPattern <- ggplot(averages, aes(interval, steps)) +
   ylab('number of steps')
 print(line_dayPattern)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
 
 
 
